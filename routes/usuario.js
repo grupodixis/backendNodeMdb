@@ -9,24 +9,32 @@ var mdAutenticacion = require('../middleware/autenticacion');
 // OBTENER USURIOS
 //==================================
 
-app.get('/', (req, res, next) => {
+app.get('/', (req, res) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+    Usuario.find({})
+        .skip(desde)
+        .limit(5)
+        .exec((err, usuarios) => {
 
-    Usuario.find({}, (err, usuarios) => {
-        if (err) {
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error cargando usuario',
-                errors: err
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando usuario',
+                    errors: err
+                });
+            }
+            Usuario.count((err, conteo) => {
+                res.status(200).json({
+                    ok: true,
+                    usuarios: usuarios,
+                    total: conteo
+                });
+
             });
-        }
-        console.log(usuarios);
 
-        res.status(200).json({
-            ok: true,
-            usuarios: usuarios
-        });
 
-    })
+        })
 });
 
 
@@ -144,8 +152,8 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
 
 
-    })
-})
+    });
+});
 
 
 
